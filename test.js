@@ -12,6 +12,10 @@ function test2(val) {
 
 const events = new EventEmitter();
 events.on('test', test1)
-events.on('test', test2)
-events.off('test', test2)
+// events.on('test', test2)
+events.once('test', test2)
+// events.off('test', test2)
+// events.off('test', test2)
 events.emit('test', '666')
+events.emit('test', '666')
+console.log(events)

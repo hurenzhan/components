@@ -27,7 +27,7 @@ class EventEmitter {
     if (!this._events) this._events = {};
     const callbacks = this._events[eventName];
     if (callbacks.length) {
-      this._events[eventName] = callbacks.filter(fn => fn !== callback) // 过滤掉要取消订阅的函数
+      this._events[eventName] = callbacks.filter(fn => ![fn, fn.origin].includes(callback)) // 过滤掉要取消订阅的函数
     }
   }
 
@@ -36,8 +36,8 @@ class EventEmitter {
       callback(...args);
       this.off(eventName, oneFn)
     }
-    oneFn.l = callback;
-    this.on(eventName, oneFn)
+    oneFn.origin = callback;  // 如果绑定once马上又off掉事件，传入的fn和高阶函数并不是一个对象，所有给内部函数添加一个关联属性。
+    this.on(eventName, oneFn);
   }
 }
 
