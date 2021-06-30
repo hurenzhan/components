@@ -73,16 +73,32 @@ class linkedList {
     return node;
   }
 
-  // 反转-递归
+  // 反转-递归（性能低）
+  // reverse() {
+  //   function reverse(head) {
+  //     if (head === null || head.next === null) return head;
+  //     const newHead = reverse(head.next); // 新头变为下一个
+  //     head.next.next = head; // 让下一个人的next 指向老的头
+  //     head.next = null; // 老的头下一个指向是的null
+  //     return newHead; // newHead和head如果有相同的element，指向的是同一个地址
+  //   }
+  //   return reverse(this.head);
+  // }
+
+  // 反转-循环赋值
   reverse() {
-    function reverse(head) {
-      if (head === null || head.next === null) return head;
-      const newHead = reverse(head.next); // 新头变为下一个
-      head.next.next = head; // 让下一个人的next 指向老的头
-      head.next = null; // 老的头下一个指向是的null
-      return newHead; // newHead和head如果有相同的element，指向的是同一个地址
+    let head = this.head;
+    if (head === null || head.next === null) return head;
+    let newHead = null;
+    while (head) {
+      const n = head.next; // 要传入下个循环用的，引用原头的下一级，防止自己的原关联体因为赋值被回收
+      // 循环是从前往后头递减，所以最后一位才是第一个头。本体第一个的关联一定是null。
+      // 所有每次循环中原来的新头都会变老头，所以每次循环体的关联体都是老头
+      head.next = newHead;
+      newHead = head; // 新头就是循环的下一个本体关联新头后的结果
+      head = n;
     }
-    return reverse(this.head);
+    return newHead;
   }
 }
 
