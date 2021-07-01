@@ -11,7 +11,7 @@ class Node {
  * @链表
  * @description 链表结构类，并提供链表的操作方法
  */
-class linkedList {
+class LinkedList {
   constructor() {
     this.head = null;
     this.size = 0;  // 长度，操作下标用
@@ -102,11 +102,20 @@ class linkedList {
   }
 }
 
-const link = new linkedList;
-link.add(0);
-link.add(1);
-link.add(2);
-link.add(3);
-// link.getNode(6);
+class Queue {
+  constructor() {
+    this.linkList = new LinkedList;
+  }
 
-console.log(link.reverse());
+  add(element) {
+    this.linkList.add(element);
+  }
+
+  // 获取头并删除
+  peak() {
+    return this.linkList.remove(0);
+  }
+}
+
+exports.LinkedList = LinkedList;
+exports.Queue = Queue;

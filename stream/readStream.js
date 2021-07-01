@@ -2,7 +2,7 @@ const EventEmitter = require('events');
 const fs = require('fs');
 
 /**
- * @name 读取流
+ * @name 可读流
  * @description 可以将文件一点点读取
  * @param {path} path // 要读的文件路径
  * @param {Object} options  // 操作配置
