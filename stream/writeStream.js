@@ -1,6 +1,5 @@
 const EventEmitter = require('events');
 const fs = require('fs')
-const path = require("path");
 const {Queue} = require('../LinkList')
 
 /**
@@ -15,7 +14,7 @@ class WriteStream extends EventEmitter {
     super();
     const {flags, encoding, autoClose, emitClose, start, end, highWaterMark} = options;
     this.path = path;
-    this.flags = flags || 'r'; // r：打开文件进行读取。如果文件不存在，则会发生异常
+    this.flags = flags || 'w'; // r：打开文件进行读取。如果文件不存在，则会发生异常
     this.encoding = encoding || null; // 编码规则
     this.autoClose = autoClose || true; // 自动关闭，无论成功失败
     this.emitClose = emitClose || true; // 始终触发close事件
@@ -55,7 +54,7 @@ class WriteStream extends EventEmitter {
   }
 
   // 获取并清除准备要写的数据
-  clearBuffer() {
+  _clearBuffer() {
     const data = this.cache.peak(); // 获取并在缓存区清掉要写入的数据
     // 如果有继续写入，否则改变写入状态结束操作
     if (data) {
@@ -67,7 +66,7 @@ class WriteStream extends EventEmitter {
       // 如果结束并且写入量达到预值，触发drain事件
       if (this.needDrain) {
         this.needDrain = false;
-        this.emit('drain')
+        this.emit('drain');
       }
     }
   }
@@ -81,7 +80,7 @@ class WriteStream extends EventEmitter {
     const oldCb = cb;
     cb = () => {
       oldCb && oldCb();
-      this.clearBuffer()
+      this._clearBuffer()
     }
     // 如果还在写入，把剩余数据先放入缓存区，否则执行写入操作
     if (this.writing) {
@@ -100,38 +99,9 @@ class WriteStream extends EventEmitter {
     fs.write(this.fd, chunk, 0, chunk.length, this.offset, (err, bytesWrite) => {
       this.offset += bytesWrite;
       this.length -= bytesWrite;
-      // console.log(bytesWrite, 'bytesWrite');
       cb(); // 继续写入并清空缓存
     })
   }
 }
 
-const ws = new WriteStream(path.resolve(__dirname, 'text1.txt'), {
-  flags: 'w',
-  encoding: null,
-  mode: 0o666,
-  autoClose: true,
-  emitClose: true,
-  start: 0,
-  highWaterMark: 3 // 水位线 我预期能放到多少  我预期用多少空间来做这件事，超过预期 依然可用
-})
-
-
-let index = 0;
-
-function write() {
-  let flag = true
-  while (index !== 10 && flag) {
-    flag = ws.write(index + '')
-  }
-}
-
-write();
-ws.on('drain', function () { // 此方法 需要保证当写入的数据达到预期后，并且数据全部被清空写入到文件中，才会触发
-  write()
-  console.log('drain')
-})
-
-ws.on('open',function () { // 此方法 需要保证当写入的数据达到预期后，并且数据全部被清空写入到文件中，才会触发
-  console.log('open')
-})
+module.exports = WriteStream;
