@@ -90,21 +90,37 @@ class BST {
     }
   }
 
+  // 两级反转
+  invertTree() {
+    const traversal = node => {
+      if (node === null) return;
+      const rightNode = node.right;
+      node.right = node.left;
+      node.left = rightNode;
+      traversal(node.left);
+      traversal(node.right);
+    }
+    traversal(this.root);
+    return this.root;
+  }
+
 }
 
-const bst = new BST;
-bst.add(10);
-bst.add(6);
-bst.add(4);
-bst.add(7);
-bst.add(15);
-bst.add(11);
-bst.add(16);
-bst.add(12);
+const bst = new BST((current, element) => current.id - element.id > 0);
+bst.add({id: 10});
+bst.add({id: 6});
+bst.add({id: 4});
+bst.add({id: 7});
+bst.add({id: 15});
+bst.add({id: 11});
+bst.add({id: 16});
+bst.add({id: 12});
 console.log(bst);
 bst.levelOrderTraversal((node) => {
   console.log(node);
 });
+bst.invertTree();
+console.log(bst);
 //                10
 //          6           15
 //       4     7    11      16
