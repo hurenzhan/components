@@ -40,13 +40,30 @@ class Koa extends EventEmitter {
     return ctx;
   }
 
+  // 顺序调用列队，把度列中的方法传当做next给用户调用
+  compose(ctx) {
+    // let index = -1; // 计数，如果一个方法重复调用，返回异常
+    const dispatch = i => {
+      return Promise.resolve( // 里面的方法可能用promise，所以包裹一下
+          this.middlewares[i](
+              ctx, () => dispatch(i + 1)
+          )
+      )
+    }
+    return dispatch(0);
+  }
+
   // 处理上下文
   handleRequest(req, res) {
     const ctx = this.createContext(req, res); // 1.设置上下文
     res.statusCode = 404; // 先设置404，如果设置了body再改成200
+    this.compose(ctx).then(() => {
+
+    })
   }
 
   // 开启监听
+
   listen(...args) {
     const server = http.createServer(this.handleRequest);
     server.listen(...args);
