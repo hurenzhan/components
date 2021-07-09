@@ -39,13 +39,13 @@ class Koa extends EventEmitter {
     return ctx;
   }
 
-  // 顺序调用列队，把度列中的方法传当做next给用户调用
+  // 顺序调用列队，把队列中的方法传当做next给用户调用
   compose(ctx) {
     const middleLength = this.middlewares.length;
     let index = -1; // 计数，如果一个方法重复调用，下次回来它的值肯定会小于最新值
     const dispatch = i => {
-      // 这个i是闭包存的，下次回来还是原来的值 0 1 0 1 2 .. 1
-      // 原值肯定不会大于index，如果成立说明多次调用，抛出异常
+      // 这个i是闭包存的，下次回来还是原来的值 0 1 2 .. 1 2 ..
+      // 正常i肯定不会小于index，如果成立说明多次调用，抛出异常
       if (i <= index) return Promise.reject('next() called multiple times');
       index = i;
 
