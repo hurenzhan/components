@@ -43,6 +43,8 @@ const defineSetResponse = define('set', 'response');
 
 defineGetRequest('query');
 defineGetRequest('path');
+defineGetRequest('method');
+
 defineGetResponse('body');
 
 defineSetResponse('body');
