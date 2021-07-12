@@ -20,7 +20,7 @@ proto.use = function (path) {
   const args = Array.from(arguments); // '/xx', fn
   let handlers = [];  // 一个路由可能传多个方法，存起来
   if (typeof path === 'function') { // 如果没传路径，说明任何情况都要使用，默认为根路径
-    path = '/';
+    path = 'a/';
     handlers = [...args];
   }
 };
