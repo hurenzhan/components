@@ -3,12 +3,12 @@ const Layer = require('./layer');
 
 /**
  * @name 路由
- * @description 存放执行层下面的路由
+ * @description 存放执行层方法列表，用来依次调用方法用
  * @return {Class}
  */
 class Route {
   constructor() {
-    this.stack = [];
+    this.stack = [];  // layer栈，存放方法
     this.methods = {};  // 用来标识route上包含哪些方法
   }
 

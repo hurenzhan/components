@@ -8,13 +8,14 @@ class Application {
     this.router = undefined;  // 每个应用默认创建一个路由系统, 有可能人家是用应用，不用路由系统
   }
 
+  /*1.添加中间件*/
   use(...arg) {
-    this.lazyRoute();
+    this._lazyRoute();
     this.router.use(arg);
   }
 
   // 添加路由和通用中间件
-  lazyRoute() {
+  _lazyRoute() {
     // 如果没有路由，创建一个路由系统
     if (!this.router) {
       this.router = Router();
@@ -36,5 +37,13 @@ class Application {
     }
   }
 }
+
+/*2.注册路由*/
+methods.forEach(method => {
+  Application.prototype[method] = function (path, ...handlers) {
+    this._lazyRoute();
+    this.router[method](path, handlers);
+  }
+})
 
 module.exports = Application;

@@ -21,23 +21,7 @@ function Router() { // 因为需要既能new也能执行，所以必须得是函
 
 const proto = {};
 
-proto.route = function (path) {
-  const route = new Route;
-  const layer = new Layer(path, route.dispatch.bind(route));  // this指向实例本身，不然执行this可能有问题
-  layer.route = route;
-  this.stack.push(layer);
-  return route;
-};
-
-// 配置请求类型
-methods.forEach(method => {
-  proto[method] = function (path, ...handlers) { // 向路由的stack中添加
-    const route = this.route(path); // 每次配置一个新路由，并且配置到新的layer上加入队列
-    route[method](handlers);  // 给路由添加方法
-  };
-})
-
-// 注册路由
+/*1.注册路由*/
 proto.use = function (path, ...arg) { // '/xx', fn
   let handlers = [];  // 一个路由可能传多个方法，存起来
   if (typeof path === 'function') { // 如果没传路径，说明任何情况都要使用，默认为根路径
@@ -53,14 +37,40 @@ proto.use = function (path, ...arg) { // '/xx', fn
   })
 };
 
-// 查找子路由执行
+/*2.配置请求类型*/
+methods.forEach(method => {
+  proto[method] = function (path, ...handlers) { // 向路由的stack中添加
+    const route = this.route(path); // 每次配置一个新路由，并且配置到新的layer上加入队列
+    route[method](handlers);  // 给路由添加方法
+  };
+})
+
+/*3.执行栈队列*/
 proto.handle = function (req, res, done) {
   const {pathname} = url.parse(req.url);
   const method = req.method.toLowerCase();
   let i = 0;
   const next = err => {
-    if (i === this.stack.length) return done();
+    if (i === this.stack.length) return done(); // 说明匹配不到可调用的，或者调用完最后一个方法没做end处理的
+    const layer = this.stack[i++];
+    if (err) {
+
+    } else {
+      // 匹配队列中的路径
+      if (layer.match(pathname)) {
+
+      }
+    }
   }
+};
+
+proto.route = function (path) {
+  const route = new Route;
+  // 它的handler其实是路由执行栈，调用它下面的方法
+  const layer = new Layer(path, route.dispatch.bind(route));  // this指向实例本身，不然执行this可能有问题
+  layer.route = route;
+  this.stack.push(layer);
+  return route;
 };
 
 // Router().handle({url: 'www.baidu.com/a?a=1&b=2'})
