@@ -19,6 +19,7 @@ class Route {
       if (err) return out(err);  // 内部路由抛出错误 我就将错误派发到外层处理
       if (i === this.stack.length) return out();  // 说明执行完了
       const layer = this.stack[i++];
+      console.log(layer.handler, 'layer');
       if (layer.method === req.method.toLowerCase()) {
         layer.handler(req, res, next)
       } else {

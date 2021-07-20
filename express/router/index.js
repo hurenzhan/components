@@ -39,50 +39,66 @@ proto.use = function (path, ...arg) { // '/xx', fn
 
 /*2.注册路由（配置请求类型）*/
 methods.forEach(method => {
-  proto[method] = function (path, ...handlers) { // 向路由的stack中添加
+  proto[method] = function (path, handlers) { // 向路由的stack中添加
     const route = this.route(path); // 每次配置一个新路由，并且配置到新的layer上加入队列
     route[method](handlers);  // 给路由添加方法
   };
 })
-
-function handleNext(layer, req, res, next) {
-  const { pathname } = url.parse(req.url);
-  const isMatch = layer.match(pathname);
-  req.params = layer.params
-  const matchMap = {
-
-  }
-}
 
 /*3.执行栈队列*/
 proto.handle = function (req, res, done) {
   const {pathname} = url.parse(req.url);
   const method = req.method.toLowerCase();
   let i = 0;
+  let removed = ''
   const next = err => {
     if (i === this.stack.length) return done(); // 说明匹配不到可调用的，或者调用完最后一个方法没做end处理的
     const layer = this.stack[i++];
-    if (err) {
 
-    } else {
-      // 匹配队列中的路径
-      if (layer.match(pathname)) {
-        req.params = layer.params;  // 赋值动态路由参数
+    if (removed.length) {
+      req.url = removed + req.url;
+      removed = ''; // 从next方法出来的时候 需要增添前缀
+    }
+
+    if (err) {
+      // 如果有错误就在栈中查找错误处理中间件，不是错误处理中间件的就不要执行了
+      if (!layer.route) {
+        if (layer.handler.length === 4) return layer.handler(err, req, res, next);  // router dispatch
+        return next(err);
       }
+      next(err);
+    } else {
+      if (layer.match(pathname)) {
+        req.params = layer.params;  // 如果是动态路由，把参数赋值
+        if (!layer.router) {  // 没路由说明是中间件
+          if (layer.handler.length === 4) return next();  // 如果正常情况下，是不执行错误处理中间件的
+          if (layer.path !== '/') { // 如果中间件带路径，要剔除前缀，因为可能是二级路由，需要用二级路由的路径去匹配
+            removed = layer.path;
+            req.url = req.url.slice(removed.length);  // 截取二级路由匹配路径
+          }
+          return layer.handle_request(req, res, next);
+        }
+
+        // 先匹配方法再执行，不然同一个路径可能多个不同类型的请求
+        if (layer.route.methods[method]) {
+          return layer.handle_request(req, res, next);
+        }
+
+        return next();
+      }
+      next(); // 匹配不到直接走下一个
     }
   };
   next();
 };
 
 proto.route = function (path) {
-  const route = new Route;
-  // 它的handler其实是路由执行栈，调用它下面的方法
-  const layer = new Layer(path, route.dispatch.bind(route));  // this指向实例本身，不然执行this可能有问题
+  let route = new Route();
+  let layer = new Layer(path, route.dispatch.bind(route));
   layer.route = route;
   this.stack.push(layer);
   return route;
-};
+}
 
-// Router().handle({url: 'www.baidu.com/a?a=1&b=2'})
 
 module.exports = Router;

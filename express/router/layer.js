@@ -10,7 +10,6 @@ const {match} = require("path-to-regexp");
 class Layer {
   constructor(path, handler) {
     this.path = path; // 定义路径
-    // this.path = path; // 定义路径
     this.handler = handler;
     this.params = undefined;  // 动态路由参数
     this.method = undefined;  // 方法的类型
@@ -41,7 +40,9 @@ class Layer {
     return false;
   }
 
-  //
+  handle_request(req, res, next) {
+    return this.handler(req, res, next)
+  }
 }
 
 module.exports = Layer;
