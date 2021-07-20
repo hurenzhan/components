@@ -21,7 +21,7 @@ function Router() { // 因为需要既能new也能执行，所以必须得是函
 
 const proto = {};
 
-/*1.注册路由*/
+/*1.注册路由（中间件）*/
 proto.use = function (path, ...arg) { // '/xx', fn
   let handlers = [];  // 一个路由可能传多个方法，存起来
   if (typeof path === 'function') { // 如果没传路径，说明任何情况都要使用，默认为根路径
@@ -37,13 +37,22 @@ proto.use = function (path, ...arg) { // '/xx', fn
   })
 };
 
-/*2.配置请求类型*/
+/*2.注册路由（配置请求类型）*/
 methods.forEach(method => {
   proto[method] = function (path, ...handlers) { // 向路由的stack中添加
     const route = this.route(path); // 每次配置一个新路由，并且配置到新的layer上加入队列
     route[method](handlers);  // 给路由添加方法
   };
 })
+
+function handleNext(layer, req, res, next) {
+  const { pathname } = url.parse(req.url);
+  const isMatch = layer.match(pathname);
+  req.params = layer.params
+  const matchMap = {
+
+  }
+}
 
 /*3.执行栈队列*/
 proto.handle = function (req, res, done) {
@@ -58,10 +67,11 @@ proto.handle = function (req, res, done) {
     } else {
       // 匹配队列中的路径
       if (layer.match(pathname)) {
-
+        req.params = layer.params;  // 赋值动态路由参数
       }
     }
-  }
+  };
+  next();
 };
 
 proto.route = function (path) {

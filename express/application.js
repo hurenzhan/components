@@ -36,6 +36,18 @@ class Application {
       })
     }
   }
+
+  /*3.请求到来*/
+  listen(...args) { // app.listen()
+    const server = http.createServer((req, res) => {
+      function done() {
+        res.end(`Cannot ${req.method} ${req.url}`)
+      }
+      this._lazyRoute();
+      this.router.handle(req, res, done); // 交给路由系统来处理,路由系统处理不了会调用done方法
+    });
+    server.listen(...args)
+  }
 }
 
 /*2.注册路由*/
