@@ -22,13 +22,13 @@ function Router() { // 因为需要既能new也能执行，所以必须得是函
 const proto = {};
 
 /*1.注册路由（中间件）*/
-proto.use = function (path, ...arg) { // '/xx', fn
+proto.use = function (path, ...args) { // '/xx', fn
   let handlers = [];  // 一个路由可能传多个方法，存起来
   if (typeof path === 'function') { // 如果没传路径，说明任何情况都要使用，默认为根路径
     path = '/';
-    handlers = [path, ...arg];
+    handlers = [...args];
   } else {
-    handlers = arg;
+    handlers = args;
   }
   handlers.forEach(handler => {
     // 如果layer上有route属性 说明是路由，没有说明是中间件

@@ -9,9 +9,9 @@ class Application {
   }
 
   /*1.添加中间件*/
-  use(...arg) {
+  use(...args) {
     this._lazyRoute();
-    this.router.use(arg);
+    this.router.use(...args);
   }
 
   // 添加路由和通用中间件
