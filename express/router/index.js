@@ -13,7 +13,7 @@ function Router() { // 因为需要既能new也能执行，所以必须得是函
   const router = function (req, res, next) {
     router.handle(req, res, next);  // 通过继承得到
   };
-  router.stack = [];
+  router.stack = [];  // 执行列表
   router.events = {};
   router.__proto__ = proto;
   return router
